@@ -1,9 +1,8 @@
 
-// src/api/expenseService.js
-import axios from 'axios';
+import api from './api';
 
-const API_URL = 'http://localhost:8080/api/expenses';
+export const fetchExpenses = () => api.get('/expenses');
 
-export const fetchExpenses = () => axios.get(API_URL);
-export const createExpense = (expenseData) => axios.post(API_URL, expenseData);
+export const createExpense = (expenseData) => api.post('/expenses', expenseData);
 
+export const deleteExpense = (id) => api.delete(`/expenses/v1/delete/${id}`);

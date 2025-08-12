@@ -1,14 +1,8 @@
-import axios from 'axios';
+// donorService.js
+import api from './api';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+export const createDonor = (donorData) => api.post('/donors', donorData);
 
-export const createDonor = (donorData) => {
-  return axios.post(`${API_BASE_URL}/donors`, donorData);
-};
+export const fetchDonors = () => api.get('/donors');
 
-export const fetchDonors = () => {
-  return axios.get(`${API_BASE_URL}/donors`);
-};
-
-
-export const deleteDonor = (id) => axios.delete('/api/donors/${id}');
+export const deleteDonor = (id) => api.delete(`/donors/${id}`);

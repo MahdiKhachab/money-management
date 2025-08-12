@@ -26,61 +26,67 @@ const MonthlyReport = () => {
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleFetchReport();
-      }}
-      dir="rtl"
-      className="bg-white shadow-md rounded p-6 mb-6 max-w-2xl mx-auto"
-    >
-      <h2 className="text-lg font-bold mb-4">📊 التقرير الشهري</h2>
+<form
+  onSubmit={(e) => {
+    e.preventDefault();
+    handleFetchReport();
+  }}
+  dir="rtl"
+  className="bg-white shadow-md rounded p-6 mb-6 max-w-2xl mx-auto"
+>
+  <h2 className="text-lg font-bold mb-4">📊 التقرير الشهري</h2>
 
-      <div className="mb-4">
-        <label className="block mb-1">السنة</label>
-        <input
-          type="number"
-          placeholder="مثال: 2025"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        />
-      </div>
+  {/* Row for Year, Month, and Description */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <div>
+      <label className="block mb-1 font-semibold">السنة</label>
+      <input
+        type="number"
+        placeholder="مثال: 2025"
+        value={year}
+        onChange={(e) => setYear(e.target.value)}
+        className="w-full border p-2 rounded"
+        required
+      />
+    </div>
 
-      <div className="mb-4">
-        <label className="block mb-1">الشهر</label>
-        <input
-          type="number"
-          placeholder="1 - 12"
-          min="1"
-          max="12"
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        />
-      </div>
+    <div>
+      <label className="block mb-1 font-semibold">الشهر</label>
+      <input
+        type="number"
+        placeholder="1 - 12"
+        min="1"
+        max="12"
+        value={month}
+        onChange={(e) => setMonth(e.target.value)}
+        className="w-full border p-2 rounded"
+        required
+      />
+    </div>
 
-      <button
-        type="submit"
-        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-      >
-        عرض التقرير
-      </button>
+    
+  </div>
 
-      {error && <p className="text-red-600 mt-4">{error}</p>}
+  <button
+    type="submit"
+    className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+  >
+    عرض التقرير
+  </button>
 
-      {report && (
-        <div className="bg-gray-100 p-4 rounded mt-6 space-y-2">
-          <p><strong>السنة:</strong> {report.year}</p>
-          <p><strong>الشهر:</strong> {report.month}</p>
-          <p><strong>إجمالي الإيرادات:</strong> {report.totalIncome}</p>
-          <p><strong>إجمالي المصروفات:</strong> {report.totalExpense}</p>
-          <p><strong>الرصيد الصافي:</strong> {report.netBalance}</p>
-        </div>
-      )}
-    </form>
+  {error && <p className="text-red-600 mt-4">{error}</p>}
+
+  {report && (
+    <div className="bg-gray-100 p-4 rounded mt-6 space-y-2">
+      <p><strong>السنة:</strong> {report.year}</p>
+      <p><strong>الشهر:</strong> {report.month}</p>
+      <p><strong>إجمالي الإيرادات:</strong> {report.totalIncome}</p>
+      <p><strong>إجمالي المصروفات:</strong> {report.totalExpenses}</p>
+      <p><strong>الرصيد الصافي:</strong> {report.netBalance}</p>
+    </div>
+  )}
+</form>
+
   );
 };
 
