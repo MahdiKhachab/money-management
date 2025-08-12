@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { login } from '../../api/loginService';
 
 const LoginPage = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -10,26 +11,10 @@ const LoginPage = ({ onLogin }) => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!res.ok) {
-        setError("Invalid username or password");
-        return;
-      }
-
-      const data = await res.json();
-      if (data.token) {
-        onLogin(data.token);
-      } else {
-        setError("Login failed. No token received.");
-      }
+      const { token, username: loggedInUser } = await login(username, password);
+      onLogin(token, loggedInUser);
     } catch (err) {
-      console.error(err);
-      setError("Network error. Please try again.");
+      setError(err.message);
     }
   };
 
