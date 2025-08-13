@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet } from 'react-router-dom';
+import logo from './assets/logo.png';
 
 const Layout = ({ onLogout }) => {
   const [showDonors, setShowDonors] = useState(false);
@@ -61,7 +62,10 @@ const Layout = ({ onLogout }) => {
       <header className="bg-blue-900 text-white p-4 shadow-md sticky top-0 z-50">
         <div className="container mx-auto flex justify-between items-center">
 
-          <h1 className="text-xl font-bold">جمعية الزهراء الثقافية</h1>
+          <div className="flex items-center"> {/* Use a new flex container for the logo and text */}
+            <img src={logo} alt="Logo" className="h-10 w-10 mr-2 rounded-full" /> {/* Adjust h-10, w-10, and mr-2 as needed */}
+            <h1 className="mr-2 text-xl font-bold">جمعية الزهراء الثقافية</h1>
+          </div>
 
           {/* Hamburger Menu for Mobile */}
           <button
@@ -156,9 +160,8 @@ const Layout = ({ onLogout }) => {
             >
               <span className="text-sm font-semibold">مرحباً، {username}</span>
               <svg
-                className={`w-4 h-4 transition-transform duration-200 ${
-                  showUserMenu ? 'rotate-180' : ''
-                }`}
+                className={`w-4 h-4 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -197,9 +200,8 @@ const Layout = ({ onLogout }) => {
 
       {/* Mobile Dropdown Menu */}
       <div
-        className={`bg-blue-800 shadow-md transform transition-all duration-300 ease-in-out z-40 md:hidden ${
-          isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-        }`}
+        className={`bg-blue-800 shadow-md transform transition-all duration-300 ease-in-out z-40 md:hidden ${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+          }`}
       >
         <nav className="p-4 space-y-2 text-white">
           {/* Username + Logout in mobile */}
@@ -249,7 +251,7 @@ const Layout = ({ onLogout }) => {
             )}
           </div>
 
-         
+
           {/* Expenses */}
           <div>
             <button

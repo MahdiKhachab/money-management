@@ -2,7 +2,7 @@
 
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = "http://localhost:8080/api/auth";
+const API_URL = 'http://localhost:8080/ZahraaAPI/api/auth';
 
 export const login = async (username, password) => {
   const res = await fetch(`${API_URL}/login`, {

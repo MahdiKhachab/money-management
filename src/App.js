@@ -13,6 +13,9 @@ import DonorForm from "./features/donors/DonorForm";
 import IncomeForm from "./features/incomes/IncomForm";
 import ExpenseForm from "./features/expenses/ExpenseForm";
 
+import PublicPage from "./components/PublicPage"; // Import your new public page
+
+
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
 
@@ -42,9 +45,12 @@ function AppRoutes({ token, setToken }) {
 
   return (
     <Routes>
-      {!token ? (
-        <Route path="*" element={<LoginPage onLogin={handleLogin} />} />
-      ) : (
+      {/* Public Routes - These are accessible to everyone */}
+      <Route path="/" element={<PublicPage />} />
+      <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+      
+      {/* Protected Routes - These require a token */}
+      {token ? (
         <Route path="/" element={<Layout onLogout={handleLogout} />}>
           {/* Donors */}
           <Route path="donors/list" element={<DonorsPage />} />
@@ -62,9 +68,12 @@ function AppRoutes({ token, setToken }) {
           <Route path="reports/monthly" element={<MonthlyReport month={12} year={2025} />} />
           <Route path="reports/annual" element={<AnnualReport year={2025} />} />
 
-          {/* Redirect unknown paths */}
+          {/* Fallback for authenticated users */}
           <Route path="*" element={<Navigate to="/donors/list" />} />
         </Route>
+      ) : (
+        // Redirect any private route attempt to the login page if not authenticated
+        <Route path="*" element={<Navigate to="/" />} />
       )}
     </Routes>
   );
