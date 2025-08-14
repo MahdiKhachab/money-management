@@ -1,23 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import logo from './assets/logo.png'; // Make sure the path is correct
-
-const PublicPage = () => {
+ 
+const AboutPage = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100" dir="rtl">
-      <header className="bg-blue-900 text-white p-4 shadow-md sticky top-0 z-50">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center">
-            <img src={logo} alt="Logo" className="h-10 w-10 mr-2 rounded-full" />
-            <h1 className="mr-2 text-xl font-bold">جمعية الزهراء الثقافية</h1>
-          </div>
-          <Link to="/login" className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors">
-            تسجيل الدخول
-          </Link>
-        </div>
-      </header>
-
-      <main className="container mx-auto p-6 flex-1">
+         <main className="container mx-auto p-6 flex-1">
         <div className="bg-white p-8 rounded-lg shadow-lg">
           <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">
             مرحباً بكم في جمعية الزهراء الثقافية
@@ -47,12 +32,8 @@ const PublicPage = () => {
           </section>
         </div>
       </main>
-
-      <footer className="bg-blue-900 text-white text-center p-4">
-        &copy; {new Date().getFullYear()} جمعية الزهراء الثقافية. جميع الحقوق محفوظة.
-      </footer>
-    </div>
+  
   );
 };
 
-export default PublicPage;
+export default AboutPage;

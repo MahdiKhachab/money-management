@@ -1,8 +1,9 @@
 // App.js
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import Layout from "./components/Layout";
+import Layout from "./layout/Layout";
 import LoginPage from "./features/auth/LoginPage";
+import AdminPage from './components/AdminPage'; // Import the new admin page
 
 import IncomesPage from "./features/incomes/IncomeList";
 import DonorsPage from "./features/donors/DonorList";
@@ -13,7 +14,14 @@ import DonorForm from "./features/donors/DonorForm";
 import IncomeForm from "./features/incomes/IncomForm";
 import ExpenseForm from "./features/expenses/ExpenseForm";
 
-import PublicPage from "./components/PublicPage"; // Import your new public page
+import PublicLayout from "./layout/PublicLayout";
+import AboutPage from "./features/public/AboutPage";
+import NewsPage from "./features/public/NewsPage";
+import HomePage from "./features/public/HomePage";
+import ActivityPage from "./features/public/ActivityPage";
+
+
+import DetailPage from './features/public/DetailPage';
 
 
 function App() {
@@ -40,18 +48,27 @@ function AppRoutes({ token, setToken }) {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     setToken(null);
-    navigate("/login");
+    navigate("/"); // Redirect to public page on logout
   };
 
   return (
     <Routes>
-      {/* Public Routes - These are accessible to everyone */}
-      <Route path="/" element={<PublicPage />} />
-      <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+      {/* Public Routes */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/news" element={<NewsPage />} />
+        <Route path="/details/:id" element={<DetailPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+      </Route>
       
       {/* Protected Routes - These require a token */}
       {token ? (
         <Route path="/" element={<Layout onLogout={handleLogout} />}>
+          {/* Admin Page */}
+          <Route path="admin" element={<AdminPage />} />
+
           {/* Donors */}
           <Route path="donors/list" element={<DonorsPage />} />
           <Route path="donors/card" element={<DonorForm />} />
@@ -68,11 +85,11 @@ function AppRoutes({ token, setToken }) {
           <Route path="reports/monthly" element={<MonthlyReport month={12} year={2025} />} />
           <Route path="reports/annual" element={<AnnualReport year={2025} />} />
 
-          {/* Fallback for authenticated users */}
+          {/* Redirect unknown paths */}
           <Route path="*" element={<Navigate to="/donors/list" />} />
         </Route>
       ) : (
-        // Redirect any private route attempt to the login page if not authenticated
+        // Redirect any private route attempt to the public page if not authenticated
         <Route path="*" element={<Navigate to="/" />} />
       )}
     </Routes>

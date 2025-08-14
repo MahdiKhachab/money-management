@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import logo from './assets/logo.png';
+import logo from '../components/assets/logo.png';
 
 const Layout = ({ onLogout }) => {
   const [showDonors, setShowDonors] = useState(false);
