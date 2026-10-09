@@ -1,292 +1,214 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import logo from '../components/assets/logo.png';
 
+const menuGroups = [
+  {
+    key: 'donors',
+    label: 'المتبرعين',
+    links: [
+      { to: '/donors/list', label: 'قائمة المتبرعين' },
+      { to: '/donors/card', label: 'بطاقة المتبرع' },
+    ],
+  },
+  {
+    key: 'incomes',
+    label: 'الإيرادات',
+    links: [
+      { to: '/incomes/list', label: 'قائمة الإيرادات' },
+      { to: '/incomes/card', label: 'بطاقة الإيراد' },
+    ],
+  },
+  {
+    key: 'expenses',
+    label: 'المصروفات',
+    links: [
+      { to: '/expenses/list', label: 'قائمة المصروفات' },
+      { to: '/expenses/card', label: 'بطاقة المصروف' },
+    ],
+  },
+];
+
 const Layout = ({ onLogout }) => {
-  const [showDonors, setShowDonors] = useState(false);
-  const [showIncomes, setShowIncomes] = useState(false);
-  const [showExpenses, setShowExpenses] = useState(false);
+  const [openGroup, setOpenGroup] = useState('donors');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const username = localStorage.getItem("username") || "ضيف";
+  const username = localStorage.getItem('username') || 'ضيف';
+  const userMenuRef = useRef(null);
 
-  const toggleSubMenu = (menu) => {
-    if (menu === 'donors') {
-      setShowDonors(!showDonors);
-      setShowIncomes(false);
-      setShowExpenses(false);
-    } else if (menu === 'incomes') {
-      setShowIncomes(!showIncomes);
-      setShowDonors(false);
-      setShowExpenses(false);
-    } else if (menu === 'expenses') {
-      setShowExpenses(!showExpenses);
-      setShowDonors(false);
-      setShowIncomes(false);
-    }
+  const toggleGroup = (key) => {
+    setOpenGroup((current) => (current === key ? '' : key));
   };
 
   const closeMenu = () => {
     setIsMenuOpen(false);
-    setShowDonors(false);
-    setShowIncomes(false);
-    setShowExpenses(false);
+    setOpenGroup('donors');
     setShowUserMenu(false);
   };
 
-  // Ref for detecting clicks outside the user menu
-  const userMenuRef = useRef(null);
-
   useEffect(() => {
-    function handleClickOutside(event) {
+    const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
       }
-    }
+    };
 
     if (showUserMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showUserMenu]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100" dir="rtl">
-      {/* Header */}
-      <header className="bg-blue-900 text-white p-4 shadow-md sticky top-0 z-50">
-        <div className="container mx-auto flex justify-between items-center">
+    <div className="min-h-screen bg-slate-100 text-slate-900" dir="rtl">
+      <header className="sticky top-0 z-50 border-b border-blue-900/10 bg-slate-900 text-white shadow-lg shadow-slate-900/10">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <Link to="/donors/list" className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/5 shadow-md">
+              <img src={logo} alt="شعار الجمعية" className="h-full w-full object-cover" />
+            </div>
+            <div>
+              <p className="text-base font-black text-white">جمعية الزهراء الثقافية</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-blue-200">Administrator panel</p>
+            </div>
+          </Link>
 
-          <div className="flex items-center"> {/* Use a new flex container for the logo and text */}
-            <img src={logo} alt="Logo" className="h-10 w-10 mr-2 rounded-full" /> {/* Adjust h-10, w-10, and mr-2 as needed */}
-            <h1 className="mr-2 text-xl font-bold">جمعية الزهراء الثقافية</h1>
-          </div>
-
-          {/* Hamburger Menu for Mobile */}
           <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-white md:hidden focus:outline-none"
+            type="button"
+            onClick={() => setIsMenuOpen((value) => !value)}
+            className="rounded-lg border border-white/20 p-2 text-white md:hidden"
             aria-label="Toggle menu"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-6 text-sm">
-            {/* Donors */}
-            <div className="relative group">
-              <button
-                className="py-2 px-3 hover:bg-blue-800 rounded-md transition-colors"
-                onClick={() => toggleSubMenu('donors')}
-              >
-                المتبرعين
-              </button>
-              {showDonors && (
-                <div className="absolute right-0 mt-2 w-48 bg-blue-800 rounded-md shadow-lg py-1 z-20">
-                  <Link to="/donors/list" className="block px-4 py-2 hover:bg-blue-700" onClick={closeMenu}>قائمة المتبرعين</Link>
-                  <Link to="/donors/card" className="block px-4 py-2 hover:bg-blue-700" onClick={closeMenu}>بطاقة المتبرع</Link>
-                </div>
-              )}
-            </div>
+          <nav className="hidden items-center gap-2 md:flex">
+            {menuGroups.map(({ key, label, links }) => (
+              <div key={key} className="relative">
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(key)}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                    openGroup === key ? 'bg-blue-700 text-white' : 'text-slate-200 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
 
-            {/* Incomes */}
-            <div className="relative group">
-              <button
-                className="py-2 px-3 hover:bg-blue-800 rounded-md transition-colors"
-                onClick={() => toggleSubMenu('incomes')}
-              >
-                الإيرادات
-              </button>
-              {showIncomes && (
-                <div className="absolute right-0 mt-2 w-48 bg-blue-800 rounded-md shadow-lg py-1 z-20">
-                  <Link to="/incomes/list" className="block px-4 py-2 hover:bg-blue-700" onClick={closeMenu}>قائمة الإيرادات</Link>
-                  <Link to="/incomes/card" className="block px-4 py-2 hover:bg-blue-700" onClick={closeMenu}>بطاقة الإيراد</Link>
-                </div>
-              )}
-            </div>
+                {openGroup === key && (
+                  <div className="absolute right-0 top-full z-20 mt-2 w-52 overflow-hidden rounded-2xl border border-white/10 bg-slate-800 shadow-2xl">
+                    {links.map(({ to, label: linkLabel }) => (
+                      <Link
+                        key={to}
+                        to={to}
+                        onClick={closeMenu}
+                        className="block border-b border-white/5 px-4 py-3 text-right text-sm text-slate-200 transition hover:bg-blue-700/80 hover:text-white last:border-b-0"
+                      >
+                        {linkLabel}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
 
-            {/* Expenses */}
-            <div className="relative group">
-              <button
-                className="py-2 px-3 hover:bg-blue-800 rounded-md transition-colors"
-                onClick={() => toggleSubMenu('expenses')}
-              >
-                المصروفات
-              </button>
-              {showExpenses && (
-                <div className="absolute right-0 mt-2 w-48 bg-blue-800 rounded-md shadow-lg py-1 z-20">
-                  <Link to="/expenses/list" className="block px-4 py-2 hover:bg-blue-700" onClick={closeMenu}>قائمة المصروفات</Link>
-                  <Link to="/expenses/card" className="block px-4 py-2 hover:bg-blue-700" onClick={closeMenu}>بطاقة المصروف</Link>
-                </div>
-              )}
-            </div>
-
-            {/* Reports */}
-            <div className="flex">
-              <Link to="/reports/monthly" className="py-2 px-3 hover:bg-blue-800 rounded-md transition-colors">التقارير الشهرية</Link>
-              <Link to="/reports/annual" className="py-2 px-3 hover:bg-blue-800 rounded-md transition-colors">التقارير السنوية</Link>
+            <div className="flex items-center gap-2 border-r border-white/10 pl-3">
+              <NavLink to="/reports/monthly" className="rounded-full px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/5 hover:text-white">التقارير الشهرية</NavLink>
+              <NavLink to="/reports/annual" className="rounded-full px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/5 hover:text-white">التقارير السنوية</NavLink>
             </div>
           </nav>
 
-          {/* Desktop Username + Logout submenu */}
-          <div
-            ref={userMenuRef}
-            className="hidden md:flex items-center space-x-2 ml-4 relative cursor-pointer select-none"
-          >
-            <div
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center space-x-1 text-white select-none"
-              aria-haspopup="true"
+          <div ref={userMenuRef} className="relative hidden md:block">
+            <button
+              type="button"
+              onClick={() => setShowUserMenu((value) => !value)}
+              className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10"
               aria-expanded={showUserMenu}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  setShowUserMenu(!showUserMenu);
-                }
-              }}
             >
-              <span className="text-sm font-semibold">مرحباً، {username}</span>
-              <svg
-                className={`w-4 h-4 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''
-                  }`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path d="M6 9l6 6 6-6" />
+              <span>مرحباً، {username}</span>
+              <svg className={`h-4 w-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5.5 7.5 10 12l4.5-4.5" />
               </svg>
-            </div>
+            </button>
 
             {showUserMenu && (
-              <div
-                className="absolute right-0 top-full mt-1 w-32 bg-blue-800 rounded-md shadow-lg py-1 z-20"
-                role="menu"
-                aria-label="User menu"
-              >
+              <div className="absolute left-0 top-full z-20 mt-2 w-40 overflow-hidden rounded-2xl border border-white/10 bg-slate-800 shadow-2xl">
                 <button
+                  type="button"
                   onClick={() => {
                     onLogout();
                     setShowUserMenu(false);
                   }}
-                  className="w-full text-right px-4 py-2 hover:bg-red-600 text-red-100 rounded-md text-sm"
-                  role="menuitem"
-                  aria-label="تسجيل الخروج"
+                  className="w-full bg-red-600/10 px-4 py-3 text-right text-sm font-medium text-red-200 transition hover:bg-red-600/20"
                 >
-                  خروج
+                  تسجيل الخروج
                 </button>
               </div>
             )}
           </div>
-
         </div>
+
+        {isMenuOpen && (
+          <div className="border-t border-white/10 bg-slate-900/95 md:hidden">
+            <nav className="mx-auto max-w-7xl space-y-3 px-4 py-5 text-white">
+              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-sm font-medium">مرحباً، {username}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onLogout();
+                    closeMenu();
+                  }}
+                  className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-bold text-white"
+                >
+                  خروج
+                </button>
+              </div>
+
+              {menuGroups.map(({ key, label, links }) => (
+                <div key={key} className="rounded-2xl border border-white/10 bg-white/5">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(key)}
+                    className="flex w-full items-center justify-between px-4 py-3 text-right text-sm font-medium"
+                  >
+                    {label}
+                    <svg className={`h-4 w-4 transition-transform ${openGroup === key ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M5.5 7.5 10 12l4.5-4.5" />
+                    </svg>
+                  </button>
+                  {openGroup === key && (
+                    <div className="space-y-1 border-t border-white/10 px-3 py-3">
+                      {links.map(({ to, label: linkLabel }) => (
+                        <Link key={to} to={to} onClick={closeMenu} className="block rounded-xl px-3 py-2 text-sm text-slate-200 transition hover:bg-white/5 hover:text-white">
+                          {linkLabel}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              <NavLink to="/reports/monthly" onClick={closeMenu} className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white">التقارير الشهرية</NavLink>
+              <NavLink to="/reports/annual" onClick={closeMenu} className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white">التقارير السنوية</NavLink>
+            </nav>
+          </div>
+        )}
       </header>
 
-      {/* Mobile Dropdown Menu */}
-      <div
-        className={`bg-blue-800 shadow-md transform transition-all duration-300 ease-in-out z-40 md:hidden ${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-          }`}
-      >
-        <nav className="p-4 space-y-2 text-white">
-          {/* Username + Logout in mobile */}
-          <div className="flex justify-between items-center mb-4 border-b border-blue-700 pb-2">
-            <span className="text-sm font-semibold">مرحباً، {username}</span>
-            <button
-              onClick={() => {
-                onLogout();
-                closeMenu();
-              }}
-              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition"
-              aria-label="تسجيل الخروج"
-            >
-              خروج
-            </button>
-          </div>
-
-          {/* Donors */}
-          <div>
-            <button
-              className="w-full text-right p-2 hover:bg-blue-700 rounded-md"
-              onClick={() => toggleSubMenu('donors')}
-            >
-              المتبرعين
-            </button>
-            {showDonors && (
-              <div className="pr-4 mt-2 space-y-1">
-                <Link to="/donors/list" className="block p-2 hover:bg-blue-700 rounded-md" onClick={closeMenu}>قائمة المتبرعين</Link>
-                <Link to="/donors/card" className="block p-2 hover:bg-blue-700 rounded-md" onClick={closeMenu}>بطاقة المتبرع</Link>
-              </div>
-            )}
-          </div>
-
-          {/* Incomes */}
-          <div>
-            <button
-              className="w-full text-right p-2 hover:bg-blue-700 rounded-md"
-              onClick={() => toggleSubMenu('incomes')}
-            >
-              الإيرادات
-            </button>
-            {showIncomes && (
-              <div className="pr-4 mt-2 space-y-1">
-                <Link to="/incomes/list" className="block p-2 hover:bg-blue-700 rounded-md" onClick={closeMenu}>قائمة الإيرادات</Link>
-                <Link to="/incomes/card" className="block p-2 hover:bg-blue-700 rounded-md" onClick={closeMenu}>بطاقة الإيراد</Link>
-              </div>
-            )}
-          </div>
-
-
-          {/* Expenses */}
-          <div>
-            <button
-              className="w-full text-right p-2 hover:bg-blue-700 rounded-md"
-              onClick={() => toggleSubMenu('expenses')}
-            >
-              المصروفات
-            </button>
-            {showExpenses && (
-              <div className="pr-4 mt-2 space-y-1">
-                <Link to="/expenses/list" className="block p-2 hover:bg-blue-700 rounded-md" onClick={closeMenu}>قائمة المصروفات</Link>
-                <Link to="/expenses/card" className="block p-2 hover:bg-blue-700 rounded-md" onClick={closeMenu}>بطاقة المصروف</Link>
-              </div>
-            )}
-          </div>
-
-          {/* Reports */}
-          <Link to="/reports/monthly" className="block p-2 hover:bg-blue-700 rounded-md" onClick={closeMenu}>التقارير الشهرية</Link>
-          <Link to="/reports/annual" className="block p-2 hover:bg-blue-700 rounded-md" onClick={closeMenu}>التقارير السنوية</Link>
-        </nav>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Quranic Verse */}
-        <div
-          className="bg-blue-50 text-blue-900 p-4 text-center text-lg font-semibold italic mx-6 my-4 rounded-md"
-        >
-          وَتَجْرِةٌ مَّعَ اللَّهِ ۖ وَمَا هِيَ بِخَسَارَةٍ
-          <br />
-          <span className="text-sm font-normal">سورة الفرقان - 25:58</span>
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6 rounded-[1.75rem] border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-indigo-50 px-5 py-4 text-center text-lg font-semibold text-blue-900 shadow-sm">
+          <span className="font-serif tracking-[0.08em]">وَتَجْرِبَةٌ مَعَ اللَّهِ ۖ وَمَا هِيَ بِخَسَارَةٍ</span>
+          <div className="mt-1 text-sm font-medium text-blue-700">سورة الفرقان - 25:58</div>
         </div>
 
-        {/* Outlet for nested routes */}
-        <main className="p-6 flex-1">
+        <main className="rounded-[2rem] bg-white/80 p-4 shadow-[0_20px_50px_rgba(15,23,42,0.06)] backdrop-blur-sm sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
