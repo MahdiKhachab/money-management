@@ -1,49 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getPublicContent } from '../../api/publicContentService';
+import React from 'react';
+import { FaHandsHelping } from 'react-icons/fa';
+import { fetchPublicContent } from '../../api/contentService';
+import useAsync from '../../hooks/useAsync';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
+import ContentGrid from './components/ContentGrid';
+import PageHero from './components/PageHero';
 
 const ActivityPage = () => {
-  const [activity, setActivity] = useState([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchActivity = async () => {
-      const data = await getPublicContent();
-      setActivity(data.filter(item => item.type === 'ACTIVITY'));
-    };
-    fetchActivity();
-  }, []);
-
-  const handleViewMore = (id) => {
-    navigate(`/details/${id}`);
-  };
+  useDocumentTitle('الأنشطة');
+  const { data, loading, error, reload } = useAsync(() => fetchPublicContent('ACTIVITY'), [], []);
 
   return (
-    <div className="container mx-auto p-6" dir="rtl">
-      <h2 className="text-3xl font-bold text-center mb-6">  الأنشطة </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activity.map(item => (
-          <div 
-            key={item.id} 
-            className="bg-white p-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
-          >
-            <div className="mb-2">
-              <h3 className="text-xl font-bold text-gray-800">{item.title}</h3>
-            </div>
-            <div className="mb-2">
-              <p className="text-gray-600 text-sm line-clamp-3">{item.description}</p>
-            </div>
-            <div className="mt-2 flex justify-end">
-              <button 
-                onClick={() => handleViewMore(item.id)}
-                className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-              >
-                اقرأ المزيد
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="space-y-8" dir="rtl">
+      <PageHero
+        badge="الأنشطة"
+        title="برامج ومبادرات تخدم الإنسان والمجتمع"
+        description="ورش تعليمية، فعاليات ثقافية ودينية، ومبادرات تضامنية ننظمها على مدار العام."
+        icon={FaHandsHelping}
+      />
+      <ContentGrid items={data} loading={loading} error={error} onRetry={reload} emptyTitle="لا توجد أنشطة منشورة حالياً" />
     </div>
   );
 };

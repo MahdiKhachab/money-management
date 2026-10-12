@@ -1,99 +1,84 @@
-// App.js
-import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import Layout from "./layout/Layout";
-import LoginPage from "./features/auth/LoginPage";
-import AdminPage from './components/AdminPage'; // Import the new admin page
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthContext';
+import RequireAuth from './auth/RequireAuth';
+import { LoadingState, ToastProvider } from './components/ui';
 
-import IncomesPage from "./features/incomes/IncomeList";
-import DonorsPage from "./features/donors/DonorList";
-import ExpensesPage from "./features/expenses/ExpenseList";
-import MonthlyReport from "./features/reports/monthly/MonthlyReport";
-import AnnualReport from "./features/reports/annual/AnnualReport";
-import DonorForm from "./features/donors/DonorForm";
-import IncomeForm from "./features/incomes/IncomForm";
-import ExpenseForm from "./features/expenses/ExpenseForm";
-
-import PublicLayout from "./layout/PublicLayout";
-import AboutPage from "./features/public/AboutPage";
-import NewsPage from "./features/public/NewsPage";
-import HomePage from "./features/public/HomePage";
-import ActivityPage from "./features/public/ActivityPage";
-
-
+import PublicLayout from './layout/PublicLayout';
+import HomePage from './features/public/HomePage';
+import NewsPage from './features/public/NewsPage';
+import ActivityPage from './features/public/ActivityPage';
+import AboutPage from './features/public/AboutPage';
 import DetailPage from './features/public/DetailPage';
+import NotFoundPage from './features/public/NotFoundPage';
+import LoginPage from './features/auth/LoginPage';
 
+// Admin area is code-split so public visitors never download it.
+const AdminLayout = lazy(() => import('./features/admin/AdminLayout'));
+const DashboardPage = lazy(() => import('./features/admin/dashboard/DashboardPage'));
+const DonorsPage = lazy(() => import('./features/admin/donors/DonorsPage'));
+const DonorFormPage = lazy(() => import('./features/admin/donors/DonorFormPage'));
+const IncomesPage = lazy(() => import('./features/admin/incomes/IncomesPage'));
+const IncomeFormPage = lazy(() => import('./features/admin/incomes/IncomeFormPage'));
+const ExpensesPage = lazy(() => import('./features/admin/expenses/ExpensesPage'));
+const ExpenseFormPage = lazy(() => import('./features/admin/expenses/ExpenseFormPage'));
+const MaintenancePage = lazy(() => import('./features/admin/maintenance/MaintenancePage'));
+const MaintenanceFormPage = lazy(() => import('./features/admin/maintenance/MaintenanceFormPage'));
+const ContentPage = lazy(() => import('./features/admin/content/ContentPage'));
+const ContentFormPage = lazy(() => import('./features/admin/content/ContentFormPage'));
+const ReportsPage = lazy(() => import('./features/admin/reports/ReportsPage'));
+const UsersPage = lazy(() => import('./features/admin/users/UsersPage'));
 
-function App() {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+// list + create + edit routes for one admin module
+const crudRoutes = (path, List, Form) => [
+  <Route key={path} path={path} element={<List />} />,
+  <Route key={`${path}/new`} path={`${path}/new`} element={<Form />} />,
+  <Route key={`${path}/edit`} path={`${path}/:id/edit`} element={<Form />} />,
+];
 
-  return (
-    <Router>
-      <AppRoutes token={token} setToken={setToken} />
-    </Router>
-  );
-}
-
-function AppRoutes({ token, setToken }) {
-  const navigate = useNavigate();
-
-  const handleLogin = (newToken, username) => {
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("username", username);
-    setToken(newToken);
-    navigate("/donors/list");
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    setToken(null);
-    navigate("/"); // Redirect to public page on logout
-  };
-
-  return (
+export const AppRoutes = () => (
+  <Suspense fallback={<LoadingState />}>
     <Routes>
-      {/* Public Routes */}
+      {/* Public website */}
       <Route element={<PublicLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/activity" element={<ActivityPage />} />
-        <Route path="/news" element={<NewsPage />} />
-        <Route path="/details/:id" element={<DetailPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+        <Route index element={<HomePage />} />
+        <Route path="news" element={<NewsPage />} />
+        <Route path="activity" element={<ActivityPage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="details/:id" element={<DetailPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
-      
-      {/* Protected Routes - These require a token */}
-      {token ? (
-        <Route path="/" element={<Layout onLogout={handleLogout} />}>
-          {/* Admin Page */}
-          <Route path="admin" element={<AdminPage />} />
 
-          {/* Donors */}
-          <Route path="donors/list" element={<DonorsPage />} />
-          <Route path="donors/card" element={<DonorForm />} />
+      <Route path="login" element={<LoginPage />} />
 
-          {/* Incomes */}
-          <Route path="incomes/list" element={<IncomesPage />} />
-          <Route path="incomes/card" element={<IncomeForm />} />
-
-          {/* Expenses */}
-          <Route path="expenses/list" element={<ExpensesPage />} />
-          <Route path="expenses/card" element={<ExpenseForm />} />
-
-          {/* Reports */}
-          <Route path="reports/monthly" element={<MonthlyReport month={12} year={2025} />} />
-          <Route path="reports/annual" element={<AnnualReport year={2025} />} />
-
-          {/* Redirect unknown paths */}
-          <Route path="*" element={<Navigate to="/donors/list" />} />
+      {/* Internal management (login required) */}
+      <Route path="admin" element={<RequireAuth />}>
+        <Route element={<AdminLayout />}>
+          <Route index element={<DashboardPage />} />
+          {crudRoutes('donors', DonorsPage, DonorFormPage)}
+          {crudRoutes('incomes', IncomesPage, IncomeFormPage)}
+          {crudRoutes('expenses', ExpensesPage, ExpenseFormPage)}
+          {crudRoutes('maintenance', MaintenancePage, MaintenanceFormPage)}
+          {crudRoutes('content', ContentPage, ContentFormPage)}
+          <Route path="reports" element={<ReportsPage />} />
+          <Route element={<RequireAuth role="ADMIN" />}>
+            <Route path="users" element={<UsersPage />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>
-      ) : (
-        // Redirect any private route attempt to the public page if not authenticated
-        <Route path="*" element={<Navigate to="/" />} />
-      )}
+      </Route>
     </Routes>
-  );
-}
+  </Suspense>
+);
+
+const App = () => (
+  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <ToastProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </ToastProvider>
+  </BrowserRouter>
+);
 
 export default App;

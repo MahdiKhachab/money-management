@@ -1,14 +1,13 @@
-// src/api/reportService.js
-import api from './api';
+import client from './client';
 
 export const getMonthlyReport = (year, month) =>
-  api.get('/reports/monthly', { params: { year, month } });
+  client.get('/reports/monthly', { params: { year, month } }).then((res) => res.data);
 
 export const getAnnualReport = (year) =>
-  api.get('/reports/annual', { params: { year } });
+  client.get('/reports/annual', { params: { year } }).then((res) => res.data);
 
 export const getIncomeBySource = (year) =>
-  api.get('/reports/income-by-source', { params: { year } });
+  client.get('/reports/income-by-source', { params: { year } }).then((res) => res.data);
 
 export const getExpenseByCategory = (year) =>
-  api.get('/reports/expense-by-category', { params: { year } });
+  client.get('/reports/expense-by-category', { params: { year } }).then((res) => res.data);

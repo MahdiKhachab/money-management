@@ -1,70 +1,67 @@
-# Getting Started with Create React App
+# Al-Zahraa UI (جمعية الزهراء الثقافية)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React frontend for Al-Zahraa Cultural Association. One app serves two audiences:
 
-## Available Scripts
+- **Public website** (`/`): home, news, activities, about, content details. No login needed.
+- **Internal management** (`/admin`): donors, incomes, expenses, maintenance, public content, financial reports and user creation. Requires login.
 
-In the project directory, you can run:
+The backend is the Spring Boot project `money.manegment` (REST API under `/api`).
 
-### `npm start`
+## Getting started
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Requirements: Node 18+ and a running backend.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+npm install
+cp .env.example .env.local   # then adjust the values
+npm start                    # http://localhost:3000
+```
 
-### `npm test`
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `REACT_APP_API_URL` | `http://localhost:8080/ZahraaAPI/api` | API base URL, including `/api`. When the backend runs from `mvnw spring-boot:run` (no context path), use `http://localhost:8080/api`. |
+| `REACT_APP_CURRENCY` | `EUR` | ISO currency code used to format amounts. |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+These values are baked in at build time, so rebuild after changing them.
 
-### `npm run build`
+## Scripts
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| Command | Description |
+| --- | --- |
+| `npm start` | Development server with hot reload |
+| `npm test` | Jest + Testing Library (watch mode; add `--watchAll=false` for a single run) |
+| `npm run build` | Production build in `build/` |
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Project structure
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+src/
+  api/            One module per backend resource, all built on client.js (axios + auth + errors)
+  auth/           Session storage, JWT decoding, AuthProvider, RequireAuth route guard
+  components/ui/  Shared UI kit: Button, fields, Modal/ConfirmDialog, DataTable, toasts, cards
+  config/env.js   Build-time configuration
+  constants/      Arabic labels for backend enums, month names
+  hooks/          useAsync, useEntityForm (create/edit forms), useDeleteConfirm, useDocumentTitle
+  features/
+    public/       Public pages and their components
+    admin/        Admin layout, dashboard and one folder per module (list page + form page)
+    auth/         Login page
+  layout/         Public site layout
+  utils/          Money/date formatting helpers
+```
 
-### `npm run eject`
+### Adding an admin module
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. Add `src/api/<thing>Service.js` with `fetch/fetchOne/create/update/delete` on `client`.
+2. Create `features/admin/<thing>/<Thing>Page.jsx` (list, using `DataTable` + `useDeleteConfirm`) and `<Thing>FormPage.jsx` (using `useEntityForm` + `FormShell`).
+3. Register it in `App.js` with `crudRoutes('<thing>', ListPage, FormPage)` and add a sidebar entry in `features/admin/AdminLayout.jsx`.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Authentication and roles
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- Login returns a JWT. It is stored in `localStorage` and sent as `Authorization: Bearer …`.
+- The token's `exp` is checked on startup and the user is logged out automatically when it expires (the backend sets this to 1 hour with `jwt.expiration`). Any `401` from the API also ends the session and sends the user to the login page.
+- `ADMIN` users can create accounts at `/admin/users`. `USER` accounts manage finances and content. The backend enforces the same rule: `/api/auth/register` requires `ADMIN`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Deployment
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Run `npm run build` and serve the `build/` folder from any static host. Configure the host to fall back to `index.html` for unknown paths so client-side routes such as `/admin/donors` work on refresh. The backend must allow the site's origin (CORS) and serve uploaded files at `/api/public/uploads/**`.
