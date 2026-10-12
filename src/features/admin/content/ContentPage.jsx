@@ -26,7 +26,7 @@ const ContentPage = () => {
       render: (r) => (
         <div className="flex items-center gap-3">
           {r.attachmentUrl && isImage(r.attachmentUrl) ? (
-            <img src={assetUrl(r.attachmentUrl)} alt="" className="h-12 w-16 shrink-0 rounded-lg object-cover ring-1 ring-slate-200" loading="lazy" />
+            <img src={assetUrl(r.attachmentUrl)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} className="h-12 w-16 shrink-0 rounded-lg object-cover ring-1 ring-slate-200" loading="lazy" />
           ) : (
             <div className="flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400"><FiImage /></div>
           )}

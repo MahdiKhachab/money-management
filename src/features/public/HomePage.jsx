@@ -1,5 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
+import { fetchPublicContent } from '../../api/contentService';
+import useAsync from '../../hooks/useAsync';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
+import ContentGrid from './components/ContentGrid';
 
 const highlights = [
   { title: 'التعلم', description: 'ورش عمل تعليمية تساهم في تنمية مهارات المجتمع وتوسيع مدارك أفراده.', badge: 'برامج تعليمية' },
@@ -13,7 +18,27 @@ const stats = [
   { value: '12', label: 'مشروعاً مستمراً' },
 ];
 
+const LatestSection = ({ eyebrow, title, to, items, loading, error, onRetry }) => (
+  <section className="space-y-6">
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p className="text-sm font-bold text-blue-700">{eyebrow}</p>
+        <h2 className="mt-2 text-3xl font-black text-slate-900">{title}</h2>
+      </div>
+      <Link to={to} className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-slate-800">
+        عرض الكل
+        <FaArrowLeft className="h-3 w-3" />
+      </Link>
+    </div>
+    <ContentGrid items={items} loading={loading} error={error} onRetry={onRetry} />
+  </section>
+);
+
 const HomePage = () => {
+  useDocumentTitle();
+  const { data: content, loading, error, reload } = useAsync(() => fetchPublicContent(), [], []);
+  const latest = (type) => content.filter((item) => item.type === type).slice(0, 3);
+
   return (
     <div className="space-y-8" dir="rtl">
       <section className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white shadow-[0_30px_80px_rgba(30,64,175,0.35)]">
@@ -71,6 +96,9 @@ const HomePage = () => {
           </article>
         ))}
       </section>
+
+      <LatestSection eyebrow="آخر الأخبار" title="ما الجديد في الجمعية" to="/news" items={latest('NEWS')} loading={loading} error={error} onRetry={reload} />
+      <LatestSection eyebrow="أنشطتنا" title="أحدث الأنشطة والمبادرات" to="/activity" items={latest('ACTIVITY')} loading={loading} error={error} onRetry={reload} />
 
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_20px_45px_rgba(15,23,42,0.06)] sm:p-8">
         <div className="mb-6 flex items-center justify-between gap-4">

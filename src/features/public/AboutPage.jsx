@@ -1,4 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { fetchPublicContent } from '../../api/contentService';
+import useAsync from '../../hooks/useAsync';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
+import { formatDate } from '../../utils/format';
 import { FaBookOpen, FaHandshake, FaLeaf, FaUsers, FaCompass, FaCalendarAlt } from 'react-icons/fa';
 
 const pillars = [
@@ -26,13 +31,19 @@ const activities = [
   { label: 'برامج توعية صحية وبيئية', icon: FaUsers },
 ];
 
-const upcomingEvents = [
+// Shown when no activities have been published yet
+const fallbackEvents = [
   'ندوة ثقافية عن التنمية المجتمعية',
   'مبادرة تعليمية للطلاب والباحثين',
   'فعالية تضامنية لدعم الأسر',
 ];
 
 const AboutPage = () => {
+  useDocumentTitle('من نحن');
+  const { data: content } = useAsync(() => fetchPublicContent(), [], []);
+  const aboutEntries = content.filter((item) => item.type === 'ABOUT');
+  const latestActivities = content.filter((item) => item.type === 'ACTIVITY').slice(0, 3);
+
   return (
    <div className="space-y-8" dir="rtl">
      <section className="reveal-section overflow-hidden rounded-[2rem] bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white shadow-[0_30px_80px_rgba(15,23,42,0.2)]">
@@ -103,6 +114,17 @@ const AboutPage = () => {
        ))}
      </section>
 
+     {aboutEntries.length > 0 && (
+       <section className="reveal-section space-y-5">
+         {aboutEntries.map((entry) => (
+           <article key={entry.id} className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_15px_35px_rgba(15,23,42,0.06)] sm:p-8">
+             <h2 className="mb-3 text-2xl font-black text-slate-900">{entry.title}</h2>
+             <p className="whitespace-pre-line text-base leading-8 text-slate-600">{entry.description}</p>
+           </article>
+         ))}
+       </section>
+     )}
+
      <section className="reveal-section grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_20px_45px_rgba(15,23,42,0.06)] sm:p-8">
          <div className="mb-6 flex items-center justify-between gap-4">
@@ -136,12 +158,24 @@ const AboutPage = () => {
          </div>
          <h3 className="mt-3 text-3xl font-black">نخطط لفعاليات مجتمعية تعزز الوعي والتواصل</h3>
          <ul className="mt-6 space-y-4">
-           {upcomingEvents.map((event) => (
-             <li key={event} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-               <span className="mt-1 inline-flex h-3 w-3 rounded-full bg-blue-400" aria-hidden="true" />
-               <span className="text-base text-slate-100">{event}</span>
-             </li>
-           ))}
+           {latestActivities.length
+             ? latestActivities.map((item) => (
+                 <li key={item.id}>
+                   <Link to={`/details/${item.id}`} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10">
+                     <span className="mt-2 inline-flex h-3 w-3 shrink-0 rounded-full bg-blue-400" aria-hidden="true" />
+                     <span>
+                       <span className="block text-base text-slate-100">{item.title}</span>
+                       <span className="text-xs text-blue-200">{formatDate(item.createdAt)}</span>
+                     </span>
+                   </Link>
+                 </li>
+               ))
+             : fallbackEvents.map((event) => (
+                 <li key={event} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                   <span className="mt-1 inline-flex h-3 w-3 rounded-full bg-blue-400" aria-hidden="true" />
+                   <span className="text-base text-slate-100">{event}</span>
+                 </li>
+               ))}
          </ul>
        </aside>
      </section>
