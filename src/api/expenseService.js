@@ -1,8 +1,7 @@
+import client from './client';
 
-import api from './api';
-
-export const fetchExpenses = () => api.get('/expenses');
-
-export const createExpense = (expenseData) => api.post('/expenses', expenseData);
-
-export const deleteExpense = (id) => api.delete(`/expenses/v1/delete/${id}`);
+export const fetchExpenses = () => client.get('/expenses').then((res) => res.data);
+export const fetchExpense = (id) => client.get(`/expenses/${id}`).then((res) => res.data);
+export const createExpense = (expense) => client.post('/expenses', expense).then((res) => res.data);
+export const updateExpense = (id, expense) => client.put(`/expenses/${id}`, expense).then((res) => res.data);
+export const deleteExpense = (id) => client.delete(`/expenses/${id}`);

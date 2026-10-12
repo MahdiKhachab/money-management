@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaHandsHelping, FaArrowLeft, FaCalendarCheck } from 'react-icons/fa';
-import { getPublicContent } from '../../api/publicContentService';
+import { fetchPublicContent as getPublicContent } from '../../api/contentService';
 
 const ActivityPage = () => {
   const [activity, setActivity] = useState([]);

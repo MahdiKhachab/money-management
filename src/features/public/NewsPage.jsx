@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaNewspaper, FaArrowLeft } from 'react-icons/fa';
-import { getPublicContent } from '../../api/publicContentService';
+import { fetchPublicContent as getPublicContent } from '../../api/contentService';
 
 const NewsPage = () => {
   const [news, setNews] = useState([]);

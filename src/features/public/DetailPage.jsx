@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getPublicContentById } from '../../api/publicContentService';
+import { fetchPublicContentById as getPublicContentById } from '../../api/contentService';
 
 const DetailPage = () => {
   const { id } = useParams();
